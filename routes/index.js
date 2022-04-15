@@ -1,143 +1,93 @@
 
 var express = require('express');
+const { json } = require('express/lib/response');
 var router = express.Router();
-var fs = require("fs");
 
-// start by creating data so we don't have to type it in each time
-let ServerMovieArray = [];
 
-// define a constructor to create movie objects
-let MovieObject = function (pTitle, pYear, pGenre, pMan, pWoman, pURL) {
-    this.ID = Math.random().toString(16).slice(5)  // tiny chance could get duplicates!
-    this.Title = pTitle;
-    this.Year = pYear;
-    this.Genre = pGenre;  // action  comedy  drama  horrow scifi  musical  western
+let ServerOrderArray = [];
+let ServerOrderObject = function (pStoreId, pSalesPersonId, pCdId, pPricePaid, pDate){
+  this.StoreID = pStoreId,
+  this.SalesPersonID = pSalesPersonId,
+  this.CdID = pCdId,
+  this.PricePaid = pPricePaid,
+  this.Date = pDate
 }
 
-// removed my file management code,
-
-// add mongoDB support  ===============================
-
-// mongoose is a API wrapper overtop of mongodb, just like
-// .ADO.Net is a wrapper over raw SQL server interface
+// add mongoDb support
 const mongoose = require("mongoose");
+const OrderSchema = require("../orderSchema");
 
-const MovieSchema = require("../movieSchema");
+const connectionString = "mongodb+srv://jsablaon:jsablaon@josablao-cluster-0.pl1cg.mongodb.net/OrdersDB?retryWrites=true&w=majority";
 
-
-// edited to include my non-admin, user level account and PW on mongo atlas
-// and also to include the name of the mongo DB that the collection is in (MoviesDB)
-const dbURI =
-  "mongodb+srv://iluvjuntae:@haleynisit420.cj3rn.mongodb.net/Movies?retryWrites=true&w=majority";
-
-  //mongodb+srv://iluvjuntae:@haleynisit420.cj3rn.mongodb.net/Movies?retryWrites=true&w=majority
-  // Make Mongoose use `findOneAndUpdate()`. Note that this option is `true`
-// by default, you need to set it to false.
-mongoose.set('useFindAndModify', false);
+mongoose.set("useFindAndModify", false);
 
 const options = {
   reconnectTries: Number.MAX_VALUE,
   poolSize: 10
-};
+}
 
-mongoose.connect(dbURI, options).then(
+mongoose.connect(connectionString, options).then(
   () => {
-    console.log("Database connection established!");
+    console.log("DB CONNECTION SUCCESSFUL!");
   },
   err => {
-    console.log("Error connecting Database instance due to: ", err);
+    console.log("CONNECTION FAILED!!!!");
   }
 );
 
-
-//============================================
+//=======================================================
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.sendFile('index.html');
 });
 
-/* GET all Movie data */
-router.get('/getAllMovies', function(req, res) {
-  // find {  takes values, but leaving it blank gets all}
-  MovieSchema.find({}, (err, AllMovies) => { //an object with methods that change the database, All movies is all the info you take from the database w/ a new name
-    if (err) {
+router.get('/getAllOrders', function(request, response) {
+  OrderSchema.find({}, (err, allOrders) => {
+    if(err){
       console.log(err);
+      response.status(500).send(err);
+    }
+    response.status(200).json(allOrders);
+  });
+});
+
+
+
+/* Add 500 new Order to DB */
+router.post('/Add500Order', function(req, res) {
+  const newOrder = req.body;  // get the object from the req object sent from browser
+  // write to db
+  let newOrderToDb = new OrderSchema(newOrder);
+  console.log(newOrder);
+  newOrderToDb.save(function(err, result){
+    if(err){
       res.status(500).send(err);
-    }
-    res.status(200).json(AllMovies);
-  });
-});
+    } else {
+      console.log(result);
 
-
-/* GET just drama Movie data */
-// router.get('/getAllDramaMovies', function(req, res) {
-//   let which = "drama";
-//   MovieSchema.find(  {Genre: which,  Year: { $gt: 1971, $lt: 1996} }  , (err, AllMovies) => {
-//     if (err) {
-//       console.log(err);
-//       res.status(500).send(err);
-//     }
-//     console.log(AllMovies);
-//     res.status(200).json(AllMovies);
-//   });
-// });
-
-
-// had to swtich from arrow function style to the .exec style to add the .sort function
-//Article.find({}).sort({fieldA: 1, fieldB: 1}).exec(function(err, docs){...})
-
-router.get('/getAllDramaMovies', function(req, res) {
-  let which = "drama";
-  MovieSchema.find({Genre: which,  Year: { $gt: 1971, $lt: 1996} }).sort({ Year: -1}).exec(function(err, AllMovies) {
-    if (err) {
-      console.log(err);
-      res.status(500).send(err);
-    }
-    console.log(AllMovies);
-    res.status(200).json(AllMovies);
-  });
-});
-
-
-/* Add one new Movie */
-router.post('/AddMovie', function(req, res) {
-
-  let oneNewMovie = new MovieSchema(req.body);  
-  console.log(req.body);
-  oneNewMovie.save((err, todo) => {
-    if (err) {
-      res.status(500).send(err);
-    }
-    else {
-    // console.log(todo);
-    // res.status(201).json(todo);
-
-    var response = {
-      status  : 200,
-      success : 'Added Successfully'
-    }
-    res.end(JSON.stringify(response)); // send reply
-
+      let response = {
+        status: 200,
+        success: "Added new order successfully."
+      }
+      res.end(JSON.stringify(response));
     }
   });
 });
 
-
-// delete movie
-router.delete('/DeleteMovie/:ID', function (req, res) {
-  MovieSchema.deleteOne({ ID: req.params.ID }, (err, note) => { 
-    if (err) {
-      res.status(404).send(err);
-    }
-    var response = {
-      status  : 200,
-      success : 'Movie ' +  req.params.ID + ' deleted!'
-    }
-    res.end(JSON.stringify(response)); // send reply
-  });
+/* Add one new Order */
+router.post('/AddOrder', function(req, res) {
+  const newOrder = req.body;  // get the object from the req object sent from browser
+  let newOrderObject = new ServerOrderObject(newOrder.StoreID, newOrder.SalesPersonID, newOrder.CdID, newOrder.PricePaid, newOrder.Date);
+  console.log(newOrderObject, "new order object");
+  ServerOrderArray.push(newOrderObject);  // add it to our "DB"  (array)
+  console.log(`added 1 to server array ${ServerOrderArray.length}`);
+  // prepare a reply to the browser
+  let response = {
+    status  : 200,
+    success : 'Added Successfully'
+  }
+  res.end(JSON.stringify(response)); // send reply
 });
-
-
 
 module.exports = router;
