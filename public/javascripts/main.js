@@ -111,6 +111,10 @@ document.addEventListener("DOMContentLoaded", function () {
     expensiveList();      
 })
 
+document.getElementById("buttonCdSold").addEventListener("click", function () {
+    leastCdSold();
+});
+
   
 });
 // end of wait until document has loaded event  *************************************************************************
@@ -145,6 +149,40 @@ function expensiveList() {
       .then( responseData => SimpFill(responseData))    //update our array and li's
       .catch(err => console.log('Request Failed', err)); // Catch errors
   };
+
+  let leastSold = [];
+  let ls = [];
+  function fillUL(data) {
+    ordersArray = data;
+        // clear prior data
+    var divMovieList = document.getElementById("divOrderList");
+    while (divMovieList.firstChild) {    // remove any old data so don't get duplicates
+        divMovieList.removeChild(divMovieList.firstChild);
+    };
+
+    var ul = document.createElement('ul');
+
+    for(let i = 0; i < leastSold.length; i++){
+        console.log(leastSold[i]["id"], leastSold[i]["cdid"], leastSold[i]["sale"], "just logging");    // for(let i = 0; i < leastSold.length; i++){
+    }
+
+    ordersArray.forEach(function (element,) {   // use handy array forEach method
+        var li = document.createElement('li');
+        li.innerHTML = element["_id"] + ":  &nbsp &nbsp  &nbsp &nbsp " + 
+        element["cdcount"]
+        ul.appendChild(li);
+    });
+    divMovieList.appendChild(ul)
+}
+
+function leastCdSold() {
+
+    fetch('/getCDSale')
+    // Handle success
+    .then(response => response.json())  // get the data out of the response object
+    .then(responseData => fillUL(responseData))    //update our array and li's
+    .catch(err => console.log('Request Failed', err)); // Catch errors
+};
 
 let timeElapsed = Date.now();
 function GetTimeString(rt) {
