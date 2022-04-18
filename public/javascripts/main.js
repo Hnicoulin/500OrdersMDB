@@ -21,6 +21,12 @@ let OrderObject = function (pStoreId, pSalesPersonId, pCdId, pPricePaid, pDate) 
   this.Time = pDate;
 }
 
+let IqObject = function (oStoreID,oCount){
+  this.StoreID = oStoreID;
+  this.Count = oCount;
+
+}
+
 
 let initialDateTime = Date.now();
 let newOrder;
@@ -114,8 +120,9 @@ document.addEventListener("DOMContentLoaded", function () {
   
 });
 // end of wait until document has loaded event  *************************************************************************
-cdArray = [];
+
 function SimpFill(data){
+  cdArray = [];
   cdArray = data;
     console.log(cdArray);
         // clear prior data
@@ -123,16 +130,22 @@ function SimpFill(data){
     while (divOrderList.firstChild) {    // remove any old data so don't get duplicates
       divOrderList.removeChild(divOrderList.firstChild);
     };
-
     var ul = document.createElement('ul');
+    var li = document.createElement('li');
+    li.innerHTML = "Store ID:  " + cdArray[0]._id +  "<br> Number of $14 CDs Sold:  " + cdArray[0].count;
+    ul.appendChild(li);
+    divOrderList.appendChild(ul);
    
-    cdArray.forEach(function (element,) {   // use handy array forEach method
-        var li = document.createElement('li');
-        li.innerHTML = `StoreID = ${newOrder._id} <br>
-        Number of Expensive Cd's Sold = ${newOrder.count} <br>`
-        ul.appendChild(li);
-    });
-    divOrderList.appendChild(ul)
+  // cdArray.forEach(function (element,) {   // use handy array forEach method
+     
+  //     var li = document.createElement('li');
+  //     li.innerHTML = element._id + ":  &nbsp &nbsp  &nbsp &nbsp " + 
+  //     element.count; 
+        // li.innerHTML = `StoreID = ${newOrder._id} <br>
+        // Number of Expensive Cd's Sold = ${newOrder.count} <br>`
+    //     ul.appendChild(li);
+    // });
+   // divOrderList.appendChild(ul);
 }
  
 
