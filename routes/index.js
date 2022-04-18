@@ -48,7 +48,7 @@ router.get('/getExpensiveCds', function(req, res) {
   // OrderSchema.find({CdID,  PricePaid: { $gt: 10, $lt: 15} }).sort({ PricePaid: -1}
 OrderSchema.aggregate([
 {
-  $match : {PricePaid : "13"}
+  $match : {PricePaid : "14"}
 },
 {$group:{_id:"$StoreID", count:{$sum:1}}}
 ])
