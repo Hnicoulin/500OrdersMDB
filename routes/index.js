@@ -65,6 +65,23 @@ OrderSchema.aggregate([
 });
 
 
+router.get('/getCDSale', function(req, res){
+    OrderSchema.aggregate([
+        {$match:{  CdID: {$in:["123456", "123654", "321456", "321654", "654123", "654321", "543216", "354126","621453","623451"]}}},
+        {$group: {_id:"$StoreID", cdcount:{$sum: 1}}}
+    ])
+    .sort("cdcount")
+    .exec(function(err, leastCdSold) {
+      if (err) {
+        console.log(err);
+        res.status(500).send(err);
+      }
+      console.log(leastCdSold);
+      res.status(200).json(leastCdSold);
+    });
+});
+
+
   
 
 /* GET home page. */
