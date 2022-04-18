@@ -39,7 +39,7 @@ mongoose.connect(connectionString, options).then(
 
 //=======================================================
 
-/*INTERESTING UEREY find the storeID w/ the most expensive cds between 10-15 dollars */
+/*INTERESTING QUEREY find the storeID w/ the most expensive cds between 10-15 dollars */
 
 
 router.get('/getExpensiveCds', function(req, res) {
